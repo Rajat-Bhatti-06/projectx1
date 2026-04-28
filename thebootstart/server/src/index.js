@@ -18,7 +18,9 @@ app.use(cors({
   origin: [
     process.env.CLIENT_URL,
     'http://localhost:5173',
-    'http://localhost:5173/'
+    'http://localhost:5173/',
+    'https://www.thebootstart.com/',
+    'https://www.thebootstart.com'
   ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
@@ -66,7 +68,7 @@ const startServer = async () => {
     console.log('✅ MongoDB Connected');
   } catch (err) {
     console.error('❌ MongoDB connection failed:', err.message);
-    
+
     // Only attempt fallback in development
     if (process.env.NODE_ENV !== 'production') {
       console.log('🔄 Attempting to start in-memory MongoDB fallback...');

@@ -1,5 +1,5 @@
 const API_BASE_URL = import.meta.env.PROD
-    ? 'https://www.thebootstart.com/api'
-    : 'http://localhost:5005/api';
+    ? 'https://projectx1-d7fn.onrender.com'
+    : 'https://projectx1-d7fn.onrender.com';
 
 export default API_BASE_URL;
