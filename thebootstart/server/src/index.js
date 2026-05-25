@@ -12,6 +12,9 @@ const adminRoutes = require('./routes/admin');
 
 const app = express();
 
+// Trust the first proxy hop so X-Forwarded-For is available behind Render
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet());
 app.use(cors({
