@@ -1,34 +1,22 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const createTransporter = () => {
-    if (!process.env.EMAIL_USER || process.env.EMAIL_USER === 'your_gmail@gmail.com') {
-        return null; // Email not configured
-    }
-    return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
-    const transporter = createTransporter();
-    if (!transporter) {
-        console.log(`[Email Skipped] Transporter not ready for: ${to}`);
+    if (!process.env.RESEND_API_KEY) {
+        console.log(`[Email Skipped] Resend API key not configured for: ${to}`);
         return Promise.resolve();
     }
 
     console.log(`[Email] Attempting to send to: ${to}...`);
     try {
-        const info = await transporter.sendMail({
-            from: `"TheBootstart" <${process.env.EMAIL_USER}>`,
+        const info = await resend.emails.send({
+            from: 'info@thebootstart.com',
             to,
             subject,
             html
         });
-        console.log(`[Email Success] Message sent: ${info.messageId}`);
+        console.log(`[Email Success] Message sent: ${info.id}`);
         return info;
     } catch (error) {
         console.error(`[Email Error] Failed to send to ${to}:`, error.message);

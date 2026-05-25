@@ -17,42 +17,50 @@ router.post('/', async (req, res) => {
             console.log('DB not available, skipping save');
         }
 
-        // Notify admin
-        await sendEmail({
-            to: process.env.ADMIN_EMAIL || 'admin@thebootstart.com',
-            subject: `📅 New Meeting Booked by ${name} - TheBootstart`,
-            html: `
-        <h2>New Meeting Booking</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Business:</strong> ${businessName || 'Not specified'}</p>
-        <p><strong>Date:</strong> ${preferredDate}</p>
-        <p><strong>Time:</strong> ${preferredTime}</p>
-        <p><strong>Note:</strong> ${message || 'None'}</p>
-      `
-        });
-
-        // Confirm to client
-        await sendEmail({
-            to: email,
-            subject: `✅ Meeting Confirmed - TheBootstart`,
-            html: `
-        <h2>Hi ${name}, your meeting is confirmed!</h2>
-        <p>We've scheduled your consultation with TheBootstart team.</p>
-        <p><strong>Date:</strong> ${preferredDate}</p>
-        <p><strong>Time:</strong> ${preferredTime}</p>
-        <p>We'll send you a Google Meet / Zoom link before the meeting. Talk soon!</p>
-        <br/>
-        <p>— TheBootstart Team 🚀</p>
-        <p>thebootstart.com</p>
-      `
-        });
-
+        // Send confirmation immediately to client (non-blocking)
         res.json({ success: true, message: `Meeting booked for ${preferredDate} at ${preferredTime}! Check your email for confirmation.` });
+
+        // Send emails in background (don't wait for them)
+        setImmediate(async () => {
+            try {
+                // Notify admin
+                await sendEmail({
+                    to: process.env.ADMIN_EMAIL || 'admin@thebootstart.com',
+                    subject: `📅 New Meeting Booked by ${name} - TheBootstart`,
+                    html: `
+            <h2>New Meeting Booking</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Business:</strong> ${businessName || 'Not specified'}</p>
+            <p><strong>Date:</strong> ${preferredDate}</p>
+            <p><strong>Time:</strong> ${preferredTime}</p>
+            <p><strong>Note:</strong> ${message || 'None'}</p>
+          `
+                });
+
+                // Confirm to client
+                await sendEmail({
+                    to: email,
+                    subject: `✅ Meeting Confirmed - TheBootstart`,
+                    html: `
+            <h2>Hi ${name}, your meeting is confirmed!</h2>
+            <p>We've scheduled your consultation with TheBootstart team.</p>
+            <p><strong>Date:</strong> ${preferredDate}</p>
+            <p><strong>Time:</strong> ${preferredTime}</p>
+            <p>We'll send you a Google Meet / Zoom link before the meeting. Talk soon!</p>
+            <br/>
+            <p>— TheBootstart Team 🚀</p>
+            <p>thebootstart.com</p>
+          `
+                });
+            } catch (emailErr) {
+                console.error('Background email sending failed:', emailErr.message);
+            }
+        });
     } catch (err) {
         console.error('Booking route error:', err);
-        res.json({ success: true, message: 'Meeting booked! We\'ll send you a confirmation email.' });
+        res.status(500).json({ success: false, message: 'Failed to book meeting. Please try again.' });
     }
 });
 
