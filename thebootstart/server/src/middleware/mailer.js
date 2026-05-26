@@ -11,7 +11,7 @@ const sendEmail = async ({ to, subject, html }) => {
     console.log(`[Email] Attempting to send to: ${to}...`);
     try {
         const info = await resend.emails.send({
-            from: 'info@thebootstart.com',
+            from: 'support@info.thebootstart.com',
             to,
             subject,
             html
